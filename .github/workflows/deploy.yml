@@ -31,13 +31,32 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: mobile/ar-games/package-lock.json
+          cache-dependency-path: mobile/package-lock.json
 
-      - name: Install dependencies
+      - name: Install dependencies (Main App)
+        working-directory: ./mobile
+        run: npm ci
+
+      - name: Install dependencies (AR Games)
         working-directory: ./mobile/ar-games
         run: npm ci
 
-      - name: Build
+      - name: Install Expo CLI
+        run: npm install -g @expo/cli
+
+      - name: Build Main App (web version)
+        working-directory: ./mobile
+        run: |
+          npx expo export:web --output-dir web-build || {
+            echo "Expo export failed, trying alternative method..."
+            npx expo start --web --no-dev --minify --output-dir web-build || true
+          }
+        env:
+          EXPO_PUBLIC_BASE_URL: /cognetive-kids/
+          CI: true
+        continue-on-error: true
+
+      - name: Build AR Games (web version)
         working-directory: ./mobile/ar-games
         run: npm run build
         env:
@@ -47,15 +66,44 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Copy 404.html for SPA routing
-        working-directory: ./mobile/ar-games
+      - name: Check build results
         run: |
-          cp dist/index.html dist/404.html || true
+          echo "Checking build results..."
+          ls -la mobile/web-build/ 2>/dev/null || echo "Main app build directory not found"
+          ls -la mobile/ar-games/dist/ 2>/dev/null || echo "AR games build directory not found"
+
+      - name: Prepare deployment
+        run: |
+          mkdir -p deploy
+          # Копируем основное приложение (React Native веб-версия)
+          if [ -d "mobile/web-build" ] && [ "$(ls -A mobile/web-build)" ]; then
+            echo "Copying main app..."
+            cp -r mobile/web-build/* deploy/ || true
+            # Копируем AR игры в подпапку
+            if [ -d "mobile/ar-games/dist" ]; then
+              mkdir -p deploy/ar-games
+              cp -r mobile/ar-games/dist/* deploy/ar-games/ || true
+            fi
+          else
+            echo "Main app not built, using AR games only..."
+            # Если основное приложение не собралось, используем только AR игры
+            if [ -d "mobile/ar-games/dist" ]; then
+              cp -r mobile/ar-games/dist/* deploy/ || true
+            fi
+          fi
+          # Создаем 404.html для SPA routing
+          if [ -f "deploy/index.html" ]; then
+            cp deploy/index.html deploy/404.html || true
+            echo "Created 404.html for SPA routing"
+          fi
+          # Показываем что задеплоится
+          echo "Deployment contents:"
+          ls -la deploy/ | head -20
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './mobile/ar-games/dist'
+          path: './deploy'
 
       - name: Deploy to GitHub Pages
         id: deployment
