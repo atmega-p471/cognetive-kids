@@ -56,7 +56,7 @@ const FarmHome = ({ onGameSelect, gameScores }) => {
           <button 
             onClick={() => {
               localStorage.removeItem('user')
-              window.location.href = '/cognetive-kids/'
+              window.location.href = window.location.origin + '/cognetive-kids/'
             }}
             style={{
               background: 'rgba(255, 255, 255, 0.2)',

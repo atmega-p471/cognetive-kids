@@ -29,8 +29,8 @@ const LoginPage = () => {
       // Сохраняем в localStorage
       localStorage.setItem('user', JSON.stringify({ username, role: 'child' }))
       
-      // Переходим к играм
-      navigate('/games')
+      // Переходим к играм (используем полный путь с base)
+      window.location.href = '/cognetive-kids/games'
     } catch (err) {
       setError('Ошибка входа. Попробуйте снова.')
     } finally {
