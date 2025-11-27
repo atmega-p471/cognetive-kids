@@ -44,12 +44,34 @@ const FarmHome = ({ onGameSelect, gameScores }) => {
 
       {/* Заголовок */}
       <div className="farm-header">
-        <h1 className="farm-title">
-          <span className="title-icon">🎮</span>
-          AR Игры
-          <span className="title-icon">✨</span>
-        </h1>
-        <p className="farm-subtitle">Играй и учись с дополненной реальностью!</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <div style={{ flex: 1 }}>
+            <h1 className="farm-title">
+              <span className="title-icon">🎮</span>
+              AR Игры
+              <span className="title-icon">✨</span>
+            </h1>
+            <p className="farm-subtitle">Играй и учись с дополненной реальностью!</p>
+          </div>
+          <button 
+            onClick={() => {
+              localStorage.removeItem('user')
+              window.location.href = '/cognetive-kids/'
+            }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.2)',
+              border: '2px solid white',
+              borderRadius: '8px',
+              padding: '8px 16px',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600'
+            }}
+          >
+            Выйти
+          </button>
+        </div>
       </div>
 
       {/* Сетка игр */}

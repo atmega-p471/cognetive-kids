@@ -60,6 +60,11 @@ function App() {
     sendMessageToRN('BACK_TO_HOME', {})
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('user')
+    window.location.href = '/cognetive-kids/'
+  }
+
   return (
     <div className="app">
       {!currentGame ? (
